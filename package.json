@@ -1,0 +1,12 @@
+{
+  "name": "cad-tool-design",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Local-first 3D mechanical simulation workspace.",
+  "scripts": {
+    "start": ".venv\\Scripts\\python.exe -m backend.cadtool.server"
+  },
+  "dependencies": {
+    "three": "^0.185.1"
+  }
+}

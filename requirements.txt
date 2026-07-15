@@ -1,0 +1,3 @@
+# Stage 1 uses Python standard library modules only.
+# Keep this file so the local setup command is stable:
+# .venv\Scripts\python.exe -m pip install -r requirements.txt

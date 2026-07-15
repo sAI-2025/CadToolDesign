@@ -1,0 +1,158 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>CadToolDesign</title>
+    <link rel="stylesheet" href="/styles.css" />
+    <script type="importmap">
+      {
+        "imports": {
+          "three": "/vendor/three/build/three.module.js"
+        }
+      }
+    </script>
+  </head>
+  <body>
+    <main id="workspaceShell" class="workspace-shell">
+      <aside id="leftSidebar" class="sidebar" aria-label="Projects and components">
+        <header class="panel-header">
+          <div>
+            <p class="eyebrow">Local Workspace</p>
+            <h1>CadToolDesign</h1>
+          </div>
+          <div class="header-actions">
+            <button id="refreshProjects" class="icon-button" type="button" title="Refresh projects" aria-label="Refresh projects">
+              &#8635;
+            </button>
+            <button id="leftSidebarToggle" class="icon-button" type="button" title="Collapse left sidebar" aria-label="Collapse left sidebar">
+              &#9664;
+            </button>
+          </div>
+        </header>
+
+        <div class="sidebar-body">
+        <form id="projectForm" class="project-form">
+          <label>
+            Project name
+            <input id="projectName" name="name" type="text" placeholder="New mechanism" autocomplete="off" required />
+          </label>
+          <label>
+            Unit
+            <select id="projectUnit" name="unit">
+              <option value="mm">mm</option>
+              <option value="cm">cm</option>
+              <option value="m">m</option>
+              <option value="in">in</option>
+            </select>
+          </label>
+          <button type="submit">Create Project</button>
+        </form>
+
+        <section class="list-section" aria-labelledby="projectListTitle">
+          <div class="section-title">
+            <div class="title-inline">
+              <button id="projectSectionToggle" class="icon-button mini-button" type="button" aria-label="Show or hide projects">&#9662;</button>
+              <h2 id="projectListTitle">Projects</h2>
+            </div>
+            <div class="section-actions">
+              <span id="projectCount">0</span>
+              <button id="deleteProjectButton" class="danger-button" type="button" disabled>Delete</button>
+            </div>
+          </div>
+          <div id="projectList" class="project-list"></div>
+        </section>
+
+        <section class="list-section muted-section" aria-labelledby="componentListTitle">
+          <div class="section-title">
+            <h2 id="componentListTitle">Components</h2>
+            <span id="componentCount">0</span>
+          </div>
+          <div class="import-panel">
+            <div class="import-controls">
+              <label>
+                Import unit
+                <select id="importUnit">
+                  <option value="mm">mm</option>
+                  <option value="cm">cm</option>
+                  <option value="m">m</option>
+                  <option value="in">in</option>
+                </select>
+              </label>
+              <button id="pickFilesButton" type="button">Pick STL Files</button>
+            </div>
+            <input id="fileInput" type="file" accept=".stl" multiple hidden />
+            <div id="dropZone" class="drop-zone" tabindex="0">Drop STL files here</div>
+          </div>
+          <div id="importWarnings" class="warning-list"></div>
+          <div id="componentList" class="project-list"></div>
+        </section>
+        </div>
+      </aside>
+
+      <section class="viewport" aria-label="3D viewport">
+        <div class="viewport-toolbar">
+          <button id="selectToolButton" class="tool-button active" type="button" title="Select">Select</button>
+          <button id="moveToolButton" class="tool-button" type="button" title="Move selected object">Move</button>
+          <button class="tool-button" type="button" title="Measure" disabled>Measure</button>
+          <button class="tool-button" type="button" title="Connect" disabled>Connect</button>
+          <button id="settingsToggle" class="icon-button toolbar-icon" type="button" title="Axis and object settings" aria-label="Axis and object settings">
+            &#9881;
+          </button>
+        </div>
+
+        <div id="viewportCanvas" class="viewport-canvas"></div>
+        <div id="viewportEmpty" class="viewport-empty">
+          <strong id="viewportEmptyTitle">No project selected</strong>
+          <span id="viewportEmptyDetail">Create or select a project.</span>
+        </div>
+
+        <div id="viewportLoading" class="viewport-empty viewport-loading" hidden>
+          <strong>Loading STL components...</strong>
+          <span id="viewportLoadingDetail">0 / 0 components</span>
+          <div class="loading-track" aria-hidden="true"><span id="viewportLoadingBar"></span></div>
+        </div>
+
+        <div id="navCube" class="nav-cube" aria-label="Navigation cube"></div>
+
+        <div id="settingsPanel" class="floating-panel hidden" aria-label="Axis and object settings"></div>
+        <div id="contextMenu" class="context-menu hidden" aria-label="Object context menu"></div>
+
+        <footer class="simulation-bar">
+          <button type="button" disabled>Play</button>
+          <button type="button" disabled>Reset</button>
+          <label>
+            Speed
+            <input type="range" min="0.1" max="10" step="0.1" value="1" disabled />
+          </label>
+          <span>1.0x</span>
+        </footer>
+      </section>
+
+      <aside id="rightSidebar" class="properties" aria-label="Properties">
+        <header class="panel-header">
+          <div>
+            <p class="eyebrow">Inspector</p>
+            <h2 id="inspectorTitle">No project selected</h2>
+          </div>
+          <button id="rightSidebarToggle" class="icon-button" type="button" title="Collapse inspector" aria-label="Collapse inspector">
+            &#9654;
+          </button>
+        </header>
+
+        <dl id="projectDetails" class="details-list sidebar-body">
+          <div>
+            <dt>Database</dt>
+            <dd id="databaseStatus">Checking...</dd>
+          </div>
+          <div>
+            <dt>Storage</dt>
+            <dd id="storageStatus">Local filesystem</dd>
+          </div>
+        </dl>
+      </aside>
+    </main>
+
+    <script type="module" src="/app.js"></script>
+  </body>
+</html>
