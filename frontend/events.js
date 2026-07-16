@@ -1,9 +1,9 @@
 import * as THREE from "three";
 import { state, sceneState, getSelectedComponent } from "./state.js";
 import { NAV_PRESETS, AXIS_MODES } from "./constants.js";
-import { getAllowedAxes } from "./utils.js";
+import { getAllowedAxes, showError } from "./utils.js";
 import {
-  deleteActiveProject, importFiles, updateComponentState, getProjectsSnapshot, loadProjects
+  deleteActiveProject, importFiles, updateComponentState, getProjectsSnapshot, loadProjects, requestJson
 } from "./api.js";
 import {
   setViewportTool, openContextMenu, hideContextMenu, renderSettingsPanel, 
@@ -45,13 +45,17 @@ export function bindEvents() {
   projectForm.addEventListener("submit", async (event) => {
     event.preventDefault();
     const formData = new FormData(projectForm);
-    const projectName = formData.get("projectName");
-    const { requestJson } = await import("./api.js");
-    await requestJson("/api/projects", {
+    const payload = {
+      name: formData.get("name"),
+      unit: formData.get("unit"),
+    };
+    const { project } = await requestJson("/api/projects", {
       method: "POST",
-      body: JSON.stringify({ name: projectName }),
+      body: JSON.stringify(payload),
     });
     projectForm.reset();
+    state.activeProjectId = project.id;
+    window.localStorage.setItem("cadtool.activeProjectId", project.id);
     await loadProjects();
   });
 
@@ -162,7 +166,7 @@ export function bindEvents() {
             }
             renderProjectDetails(state.activeProject);
           } catch (err) {
-            import("./utils.js").then(m => m.showError(err));
+            showError(err);
           }
         }
       }
@@ -281,7 +285,7 @@ export function bindEvents() {
           }
           renderProjectDetails(state.activeProject);
         } catch (err) {
-          import("./utils.js").then(m => m.showError(err));
+          showError(err);
         }
       }
     }

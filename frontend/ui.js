@@ -1,5 +1,5 @@
 import { state, getSelectedComponent, sceneState } from "./state.js";
-import { formatDate, escapeHtml, createEmptyRow, formatAxisValue, describeAxisMode, getAllowedAxes } from "./utils.js";
+import { formatDate, escapeHtml, createEmptyRow, formatAxisValue, describeAxisMode, getAllowedAxes, showError } from "./utils.js";
 import { NAV_PRESETS, AXIS_MODES } from "./constants.js";
 import { updateComponentVisibility, updateProjectUnit, updateComponentState, selectProject } from "./api.js";
 import { submitTransformEditor } from "./physics.js";
@@ -37,7 +37,7 @@ export function renderProjects(projects) {
     selectButton.innerHTML = \`<strong>\${escapeHtml(project.name)}</strong>\`;
     selectButton.addEventListener("click", () => {
       selectProject(project.id).catch(err => {
-        import("./utils.js").then(m => m.showError(err));
+        showError(err);
       });
     });
 
@@ -78,7 +78,7 @@ export function renderComponentList(components) {
     visibility.addEventListener("change", (event) => {
       event.stopPropagation();
       updateComponentVisibility(component.id, visibility.checked).catch(err => {
-        import("./utils.js").then(m => m.showError(err));
+        showError(err);
       });
     });
 

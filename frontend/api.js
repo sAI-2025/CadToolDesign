@@ -1,8 +1,9 @@
 import { state } from "./state.js";
 import { databaseStatus, storageStatus, importUnit } from "./dom.js";
 import { renderProjects, renderProjectDetails, renderComponentList, renderImportWarnings, renderSettingsPanel, hideContextMenu } from "./ui.js";
-import { updateAxisGuides, loadProjectIntoScene, applyMeshTransform, syncMeshVisibility, highlightSelectedMesh } from "./viewer.js";
+import { updateAxisGuides, loadProjectIntoScene, applyMeshTransform, syncMeshVisibility, highlightSelectedMesh, clearSceneMeshes } from "./viewer.js";
 import { setViewportMessage, hideViewportLoading, setViewportLoading } from "./ui.js";
+import { createEmptyRow, escapeHtml } from "./utils.js";
 
 export async function requestJson(url, options = {}) {
   const headers = new Headers(options.headers || {});
@@ -101,7 +102,6 @@ export async function setActiveProject(project) {
   const componentCount = document.querySelector("#componentCount");
   componentCount.textContent = "0";
   const componentList = document.querySelector("#componentList");
-  const { createEmptyRow, escapeHtml } = await import("./utils.js");
   componentList.replaceChildren(createEmptyRow("Create a project to start importing STL files."));
   document.querySelector("#importWarnings").replaceChildren();
   const projectDetails = document.querySelector("#projectDetails");
@@ -115,7 +115,6 @@ export async function setActiveProject(project) {
       <dd>${escapeHtml(storageStatus.textContent)}</dd>
     </div>
   `;
-  const { clearSceneMeshes } = await import("./viewer.js");
   clearSceneMeshes();
   document.querySelector("#viewportEmpty").hidden = false;
   renderSettingsPanel();
