@@ -849,7 +849,7 @@ async function updateComponentState(componentId, payload) {
   applyMeshTransform(component);
 }
 
-async function submitTransformEditor() {
+async function submitTransformEditor(prefix = "") {
   const component = getSelectedComponent();
   if (!component || component.locked) {
     return;
@@ -867,7 +867,7 @@ async function submitTransformEditor() {
     if (!allowed.includes(axis)) continue;
     
     // Read Move
-    const moveInput = document.getElementById(`move-${axis}`);
+    const moveInput = document.getElementById(`${prefix}move-${axis}`);
     const moveValue = Number(moveInput?.value || 0);
     if (moveValue !== 0) {
       moveDelta[axis] = moveValue;
@@ -875,7 +875,7 @@ async function submitTransformEditor() {
     }
     
     // Read Rotate
-    const rotateInput = document.getElementById(`rotate-${axis}`);
+    const rotateInput = document.getElementById(`${prefix}rotate-${axis}`);
     const rotateValue = Number(rotateInput?.value || 0);
     if (rotateValue !== 0) {
       rotateDelta[axis] = rotateValue;
@@ -1688,16 +1688,16 @@ function openContextMenu(clientX, clientY) {
 
       <div class="panel-note" style="margin-bottom: 6px; font-size: 12px; font-weight: 600;">Move (${unit})</div>
       <div class="transform-grid">
-        <label>X <input id="move-x" type="number" step="0.1" value="0" ${allowed.includes("x") && !component.locked ? "" : "disabled"} /></label>
-        <label>Y <input id="move-y" type="number" step="0.1" value="0" ${allowed.includes("y") && !component.locked ? "" : "disabled"} /></label>
-        <label>Z <input id="move-z" type="number" step="0.1" value="0" ${allowed.includes("z") && !component.locked ? "" : "disabled"} /></label>
+        <label>X <input id="context-move-x" type="number" step="0.1" value="0" ${allowed.includes("x") && !component.locked ? "" : "disabled"} /></label>
+        <label>Y <input id="context-move-y" type="number" step="0.1" value="0" ${allowed.includes("y") && !component.locked ? "" : "disabled"} /></label>
+        <label>Z <input id="context-move-z" type="number" step="0.1" value="0" ${allowed.includes("z") && !component.locked ? "" : "disabled"} /></label>
       </div>
 
       <div class="panel-note" style="margin-top: 12px; margin-bottom: 6px; font-size: 12px; font-weight: 600;">Rotate (deg)</div>
       <div class="transform-grid">
-        <label>X <input id="rotate-x" type="number" step="1" value="0" ${allowed.includes("x") && !component.locked ? "" : "disabled"} /></label>
-        <label>Y <input id="rotate-y" type="number" step="1" value="0" ${allowed.includes("y") && !component.locked ? "" : "disabled"} /></label>
-        <label>Z <input id="rotate-z" type="number" step="1" value="0" ${allowed.includes("z") && !component.locked ? "" : "disabled"} /></label>
+        <label>X <input id="context-rotate-x" type="number" step="1" value="0" ${allowed.includes("x") && !component.locked ? "" : "disabled"} /></label>
+        <label>Y <input id="context-rotate-y" type="number" step="1" value="0" ${allowed.includes("y") && !component.locked ? "" : "disabled"} /></label>
+        <label>Z <input id="context-rotate-z" type="number" step="1" value="0" ${allowed.includes("z") && !component.locked ? "" : "disabled"} /></label>
       </div>
 
       <div class="form-actions" style="margin-top: 16px; display: flex; justify-content: flex-end; gap: 8px;">
@@ -1722,7 +1722,7 @@ function openContextMenu(clientX, clientY) {
   });
 
   contextMenu.querySelector("#contextApplyTransform").addEventListener("click", async () => {
-    await submitTransformEditor();
+    await submitTransformEditor("context-");
     hideContextMenu();
   });
 }
