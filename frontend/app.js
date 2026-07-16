@@ -93,6 +93,36 @@ const sceneState = {
   scene: new THREE.Scene(),
 };
 
+// --- Undo System (SOLID: Single Responsibility Principle) ---
+class PositionUndoManager {
+  constructor(maxHistory = 50) {
+    this.history = [];
+    this.maxHistory = maxHistory;
+  }
+
+  recordPosition(componentId, previousPosition) {
+    this.history.push({
+      componentId,
+      position: { ...previousPosition }
+    });
+    if (this.history.length > this.maxHistory) {
+      this.history.shift();
+    }
+  }
+
+  popLastPosition(componentId) {
+    for (let i = this.history.length - 1; i >= 0; i--) {
+      if (this.history[i].componentId === componentId) {
+        const entry = this.history.splice(i, 1)[0];
+        return entry.position;
+      }
+    }
+    return null;
+  }
+}
+
+const positionUndoManager = new PositionUndoManager();
+
 initializeViewer();
 renderNavCube();
 bindEvents();
@@ -201,6 +231,25 @@ function bindEvents() {
   viewportCanvas.addEventListener("contextmenu", onViewportContextMenu);
   window.addEventListener("resize", onResize);
   document.addEventListener("click", onDocumentClick);
+
+  window.addEventListener("keydown", async (event) => {
+    if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === "z") {
+      event.preventDefault();
+      const component = getSelectedComponent();
+      if (!component || component.locked) return;
+
+      const previousPosition = positionUndoManager.popLastPosition(component.id);
+      if (previousPosition) {
+        const newTransform = structuredClone(component.transform);
+        newTransform.position = previousPosition;
+        try {
+          await updateComponentState(component.id, { transform: newTransform });
+        } catch (err) {
+          showError(err);
+        }
+      }
+    }
+  });
 
   settingsToggle.addEventListener("click", (event) => {
     event.stopPropagation();
@@ -810,6 +859,9 @@ async function submitTransformEditor() {
   const moveDelta = { x: 0, y: 0, z: 0 };
   const rotateDelta = { x: 0, y: 0, z: 0 };
   let hasDelta = false;
+  
+  const originalTransform = structuredClone(component.transform);
+  const originalPosition = { ...component.transform.position };
 
   for (const axis of ["x", "y", "z"]) {
     if (!allowed.includes(axis)) continue;
@@ -844,7 +896,6 @@ async function submitTransformEditor() {
   const rotSteps = Math.ceil(rotDist / 1.0);
   const steps = Math.max(1, moveSteps, rotSteps);
 
-  const originalTransform = structuredClone(component.transform);
   let successCount = 0;
   let pushedThisMove = new Set();
   
@@ -881,6 +932,8 @@ async function submitTransformEditor() {
   if (successCount === steps) {
     state.physicsMessage = "Transform applied successfully.";
   }
+
+  positionUndoManager.recordPosition(component.id, originalPosition);
 
   try {
     await updateComponentState(component.id, { transform: component.transform });
@@ -1388,6 +1441,8 @@ async function onViewportPointerUp(event) {
     return;
   }
 
+  positionUndoManager.recordPosition(drag.component.id, drag.startTransformPosition);
+
   try {
     await updateComponentState(drag.component.id, { transform: drag.component.transform });
     if (drag.pushedComponents) {
@@ -1419,6 +1474,7 @@ function startObjectDrag(event, component) {
     startPoint,
     startPosition: mesh.position.clone(),
     lastPosition: mesh.position.clone(),
+    startTransformPosition: { ...component.transform.position },
     moved: false,
   };
   sceneState.controls.enabled = false;
